@@ -1,0 +1,3136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yannakakis-rewriting.invalid/schemas/postgresql-rewrite-artifact-v6.schema.json",
+  "title": "Yannakakis PostgreSQL bounded physical-portfolio rewrite artifact v6",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "exit_code",
+    "request",
+    "outcome",
+    "report"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "yannakakis-postgresql-rewrite/v6"
+    },
+    "status": {
+      "enum": ["rewritten", "not_applicable", "invalid_query", "failed"]
+    },
+    "exit_code": {
+      "enum": [0, 2, 3, 4]
+    },
+    "request": {
+      "$ref": "#/$defs/request"
+    },
+    "outcome": {
+      "$ref": "#/$defs/outcome"
+    },
+    "report": {
+      "$ref": "#/$defs/report"
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "status": { "const": "rewritten" },
+        "exit_code": { "const": 0 },
+        "outcome": {
+          "$ref": "#/$defs/outcome",
+          "properties": {
+            "rewritten_statements": { "minItems": 1, "maxItems": 1 },
+            "rewritten_statement_sha256": { "minItems": 1, "maxItems": 1 },
+            "diagnostics": { "maxItems": 0 }
+          }
+        },
+        "report": {
+          "$ref": "#/$defs/report",
+          "properties": {
+            "completed_phase": { "const": "rendered" },
+            "physical_portfolio": {
+              "$ref": "#/$defs/physicalPortfolioAttempt",
+              "properties": {
+                "decision": { "$ref": "#/$defs/selectedDecision" }
+              }
+            },
+            "selected_plan": { "$ref": "#/$defs/selectedPlan" },
+            "bag_factor_plan": { "$ref": "#/$defs/bagFactorPlan" },
+            "rendering": { "$ref": "#/$defs/rendering" }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "status": { "const": "not_applicable" },
+        "exit_code": { "const": 2 },
+        "outcome": {
+          "$ref": "#/$defs/outcome",
+          "properties": {
+            "rewritten_statements": { "maxItems": 0 },
+            "rewritten_statement_sha256": { "maxItems": 0 },
+            "diagnostics": {
+              "minItems": 1,
+              "not": {
+                "contains": {
+                  "properties": { "severity": { "const": "error" } }
+                }
+              }
+            }
+          }
+        },
+        "report": {
+          "$ref": "#/$defs/report",
+          "properties": {
+            "completed_phase": {
+              "enum": [
+                "request-accepted",
+                "query-analyzed",
+                "hypergraph-built",
+                "soft-bags-generated",
+                "candidate-search-completed"
+              ]
+            },
+            "physical_portfolio": { "type": "null" },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "status": { "const": "invalid_query" },
+        "exit_code": { "const": 3 },
+        "outcome": {
+          "$ref": "#/$defs/outcome",
+          "properties": {
+            "rewritten_statements": { "maxItems": 0 },
+            "rewritten_statement_sha256": { "maxItems": 0 },
+            "diagnostics": {
+              "minItems": 1,
+              "contains": {
+                "properties": { "severity": { "const": "error" } }
+              },
+              "minContains": 1
+            }
+          }
+        },
+        "report": {
+          "$ref": "#/$defs/report",
+          "properties": {
+            "completed_phase": { "const": "request-accepted" }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "status": { "const": "failed" },
+        "exit_code": { "const": 4 },
+        "outcome": {
+          "$ref": "#/$defs/outcome",
+          "properties": {
+            "rewritten_statements": { "maxItems": 0 },
+            "rewritten_statement_sha256": { "maxItems": 0 },
+            "diagnostics": {
+              "minItems": 1,
+              "contains": {
+                "properties": { "severity": { "const": "error" } }
+              },
+              "minContains": 1
+            }
+          }
+        },
+        "report": {
+          "$ref": "#/$defs/report",
+          "properties": {
+            "completed_phase": {
+              "enum": [
+                "request-accepted",
+                "sql-planned",
+                "query-analyzed",
+                "hypergraph-built",
+                "soft-bags-generated",
+                "candidate-input-built",
+                "candidate-search-completed",
+                "candidate-selection-completed"
+              ]
+            },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "report": {
+              "$ref": "#/$defs/report",
+              "properties": {
+                "completed_phase": {
+                  "enum": [
+                    "request-accepted",
+                    "sql-planned",
+                    "query-analyzed",
+                    "hypergraph-built",
+                    "soft-bags-generated",
+                    "candidate-input-built",
+                    "candidate-search-completed"
+                  ]
+                },
+                "physical_portfolio": { "type": "null" }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "outcome": {
+              "$ref": "#/$defs/outcome",
+              "properties": {
+                "diagnostics": {
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "items": {
+                    "$ref": "#/$defs/diagnostic",
+                    "properties": {
+                      "code": { "const": "CANDIDATE_SELECTION_FAILED" },
+                      "severity": { "const": "error" }
+                    }
+                  }
+                }
+              }
+            },
+            "report": {
+              "$ref": "#/$defs/report",
+              "properties": {
+                "completed_phase": { "const": "candidate-selection-completed" },
+                "physical_portfolio": {
+                  "$ref": "#/$defs/physicalPortfolioAttempt",
+                  "properties": {
+                    "decision": {
+                      "oneOf": [
+                        { "$ref": "#/$defs/noAdmissibleDecision" },
+                        { "$ref": "#/$defs/failedDecision" }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "outcome": {
+                  "$ref": "#/$defs/outcome",
+                  "properties": {
+                    "diagnostics": {
+                      "items": { "$ref": "#/$defs/noAdmissibleDiagnostic" }
+                    }
+                  }
+                },
+                "report": {
+                  "$ref": "#/$defs/report",
+                  "properties": {
+                    "physical_portfolio": {
+                      "$ref": "#/$defs/physicalPortfolioAttempt",
+                      "properties": {
+                        "decision": { "$ref": "#/$defs/noAdmissibleDecision" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/$defs/portfolioFailureCorrelation",
+              "properties": {
+                "outcome": {
+                  "$ref": "#/$defs/outcome",
+                  "properties": {
+                    "diagnostics": {
+                      "items": { "$ref": "#/$defs/portfolioFailureDiagnostic" }
+                    }
+                  }
+                },
+                "report": {
+                  "$ref": "#/$defs/report",
+                  "properties": {
+                    "physical_portfolio": {
+                      "$ref": "#/$defs/physicalPortfolioAttempt",
+                      "properties": {
+                        "decision": { "$ref": "#/$defs/failedDecision" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "positive": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "candidateRank": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "canonicalBigInt": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "positiveCanonicalBigInt": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "candidateId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "physicalVariantId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "workloadId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stageId": {
+      "type": "string",
+      "pattern": "^(support:b(0|[1-9][0-9]*)|factor:b(0|[1-9][0-9]*):v(0|[1-9][0-9]*)|final-reconstruction)$"
+    },
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "selectionPolicy": {
+      "const": "postgresql_explain_factor_aware_physical_portfolio_v1"
+    },
+    "selectionScope": {
+      "const": "bounded_physical_portfolio_over_retained_structural_top_k_v1"
+    },
+    "candidateIdScheme": {
+      "const": "covered_decomposition_json_v1"
+    },
+    "physicalVariantIdScheme": {
+      "const": "postgresql_candidate_physical_portfolio_variant_v2"
+    },
+    "enumerationScheme": {
+      "const": "postgresql_bounded_physical_portfolio_heap_wave_v1"
+    },
+    "workloadIdentityScheme": {
+      "const": "postgresql_sql_stage_probe_workload_sha256_v1"
+    },
+    "deduplicationScheme": {
+      "const": "postgresql_workload_minimum_physical_variant_id_v1"
+    },
+    "reductionMode": {
+      "enum": ["full", "bottom-up", "none"]
+    },
+    "materializationDirective": {
+      "enum": ["planner-controlled", "materialized", "not-materialized"]
+    },
+    "materializationScope": {
+      "const": "all-emitted-ctes-v1"
+    },
+    "reductionOrder": {
+      "const": "canonical_plan_schedule_v1"
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_dialect",
+        "options",
+        "original_sql",
+        "original_sql_sha256"
+      ],
+      "properties": {
+        "target_dialect": { "const": "postgresql" },
+        "options": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width_bound",
+            "plan_limit",
+            "require_connected_cover",
+            "candidate_selection",
+            "neutral_reduction_schedule",
+            "portfolio_reduction_schedule_order",
+            "portfolio_materialization_directive_order",
+            "materialization_scope"
+          ],
+          "properties": {
+            "width_bound": { "$ref": "#/$defs/positive" },
+            "plan_limit": { "const": 100 },
+            "require_connected_cover": { "type": "boolean" },
+            "candidate_selection": { "$ref": "#/$defs/requestedSelection" },
+            "neutral_reduction_schedule": { "const": "full" },
+            "portfolio_reduction_schedule_order": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "prefixItems": [
+                { "const": "full" },
+                { "const": "bottom-up" },
+                { "const": "none" }
+              ],
+              "items": false
+            },
+            "portfolio_materialization_directive_order": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "prefixItems": [
+                { "const": "planner-controlled" },
+                { "const": "materialized" },
+                { "const": "not-materialized" }
+              ],
+              "items": false
+            },
+            "materialization_scope": { "$ref": "#/$defs/materializationScope" }
+          }
+        },
+        "original_sql": {
+          "type": "string",
+          "maxLength": 16777216
+        },
+        "original_sql_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "requestedSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "requested_rank", "requested_candidate_id"],
+      "properties": {
+        "policy": { "$ref": "#/$defs/selectionPolicy" },
+        "requested_rank": { "type": "null" },
+        "requested_candidate_id": { "type": "null" }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rewritten_statements",
+        "rewritten_statement_sha256",
+        "diagnostics"
+      ],
+      "properties": {
+        "rewritten_statements": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16777216,
+            "pattern": "\\S"
+          }
+        },
+        "rewritten_statement_sha256": {
+          "type": "array",
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/sha256" }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message", "context"],
+      "properties": {
+        "code": {
+          "enum": [
+            "INVALID_OPTION",
+            "INVALID_SQL",
+            "UNSUPPORTED_QUERY_SHAPE",
+            "UNSUPPORTED_JOIN_TYPE",
+            "UNSUPPORTED_PREDICATE",
+            "UNSUPPORTED_AGGREGATE",
+            "UNRESOLVED_LINEAGE",
+            "UNSAFE_BAG_SEMANTICS",
+            "NO_DECOMPOSITION",
+            "NO_CONNECTED_COVER",
+            "REWRITE_NOT_BENEFICIAL",
+            "PLANNING_FAILED",
+            "CANDIDATE_SELECTION_FAILED",
+            "RENDERING_FAILED",
+            "INTERNAL_ERROR"
+          ]
+        },
+        "severity": { "enum": ["info", "warning", "error"] },
+        "message": { "$ref": "#/$defs/nonBlank" },
+        "context": {
+          "type": "object",
+          "propertyNames": { "pattern": "\\S" },
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "noAdmissibleDiagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message", "context"],
+      "properties": {
+        "code": { "const": "CANDIDATE_SELECTION_FAILED" },
+        "severity": { "const": "error" },
+        "message": {
+          "const": "No physical portfolio workload passed the PostgreSQL row-estimate guard"
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "stage",
+            "algorithmCode",
+            "selectionPolicy",
+            "rowGuardFactor"
+          ],
+          "properties": {
+            "stage": { "const": "candidate-selection" },
+            "algorithmCode": { "const": "physical-portfolio.no-admissible" },
+            "selectionPolicy": { "$ref": "#/$defs/selectionPolicy" },
+            "rowGuardFactor": { "const": "10" }
+          }
+        }
+      }
+    },
+    "portfolioFailureDiagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message", "context"],
+      "properties": {
+        "code": { "const": "CANDIDATE_SELECTION_FAILED" },
+        "severity": { "const": "error" },
+        "message": { "const": "PostgreSQL physical portfolio selection failed" },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "stage",
+            "algorithmCode",
+            "selectionPolicy",
+            "portfolioStage",
+            "failureKind"
+          ],
+          "properties": {
+            "stage": { "const": "candidate-selection" },
+            "algorithmCode": { "$ref": "#/$defs/nonBlank" },
+            "selectionPolicy": { "$ref": "#/$defs/selectionPolicy" },
+            "portfolioStage": {
+              "enum": [
+                "enumeration",
+                "candidate-planning",
+                "stage-diagnostic-rendering",
+                "workload-deduplication",
+                "raw-rendering-resource-validation",
+                "evaluation-envelope-validation",
+                "evaluator",
+                "evidence-validation"
+              ]
+            },
+            "failureKind": {
+              "enum": [
+                "physical-portfolio.enumeration-failed",
+                "physical-portfolio.candidate-planning-failed",
+                "physical-portfolio.stage-diagnostic-rendering-failed",
+                "physical-portfolio.workload-identity-collision",
+                "physical-portfolio.raw-rendering-resource-limit-exceeded",
+                "physical-portfolio.evaluation-envelope-limit-exceeded",
+                "physical-portfolio.evaluator-failed",
+                "physical-portfolio.evidence-invalid"
+              ]
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "portfolioStage": { "const": "enumeration" },
+                "failureKind": { "const": "physical-portfolio.enumeration-failed" },
+                "algorithmCode": {
+                  "type": "string",
+                  "pattern": "^physical-portfolio\\.(input\\.missing|candidate-set\\.invalid|limits\\.invalid|resource\\.exceeded\\.\\S+|cover\\.missing|cover\\.structural-not-admissible)$"
+                }
+              }
+            },
+            {
+              "properties": {
+                "portfolioStage": { "const": "candidate-planning" },
+                "failureKind": { "const": "physical-portfolio.candidate-planning-failed" }
+              }
+            },
+            {
+              "properties": {
+                "portfolioStage": { "const": "stage-diagnostic-rendering" },
+                "failureKind": { "const": "physical-portfolio.stage-diagnostic-rendering-failed" }
+              }
+            },
+            {
+              "properties": {
+                "portfolioStage": { "const": "workload-deduplication" },
+                "failureKind": { "const": "physical-portfolio.workload-identity-collision" },
+                "algorithmCode": { "const": "physical-portfolio.workload-identity-collision" }
+              }
+            },
+            {
+              "properties": {
+                "portfolioStage": { "const": "raw-rendering-resource-validation" },
+                "failureKind": { "const": "physical-portfolio.raw-rendering-resource-limit-exceeded" },
+                "algorithmCode": {
+                  "type": "string",
+                  "pattern": "^physical-portfolio\\.resource\\.exceeded\\.\\S+$"
+                }
+              }
+            },
+            {
+              "properties": {
+                "portfolioStage": { "const": "evaluation-envelope-validation" },
+                "failureKind": { "const": "physical-portfolio.evaluation-envelope-limit-exceeded" },
+                "algorithmCode": {
+                  "type": "string",
+                  "pattern": "^physical-portfolio\\.resource\\.exceeded\\.\\S+$"
+                }
+              }
+            },
+            {
+              "properties": {
+                "portfolioStage": { "const": "evaluator" },
+                "failureKind": { "const": "physical-portfolio.evaluator-failed" },
+                "algorithmCode": {
+                  "type": "string",
+                  "pattern": "^explain\\.\\S+$"
+                }
+              }
+            },
+            {
+              "properties": {
+                "portfolioStage": { "const": "evidence-validation" },
+                "failureKind": { "const": "physical-portfolio.evidence-invalid" },
+                "algorithmCode": { "const": "physical-portfolio.evidence-invalid" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "portfolioFailureCorrelation": {
+      "oneOf": [
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.enumeration-failed" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "portfolioStage": { "const": "enumeration" },
+                          "failureKind": { "const": "physical-portfolio.enumeration-failed" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.candidate-planning-failed" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "portfolioStage": { "const": "candidate-planning" },
+                          "failureKind": { "const": "physical-portfolio.candidate-planning-failed" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.stage-diagnostic-rendering-failed" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "portfolioStage": { "const": "stage-diagnostic-rendering" },
+                          "failureKind": { "const": "physical-portfolio.stage-diagnostic-rendering-failed" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.workload-identity-collision" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "algorithmCode": { "const": "physical-portfolio.workload-identity-collision" },
+                          "portfolioStage": { "const": "workload-deduplication" },
+                          "failureKind": { "const": "physical-portfolio.workload-identity-collision" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.raw-rendering-resource-limit-exceeded" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "portfolioStage": { "const": "raw-rendering-resource-validation" },
+                          "failureKind": { "const": "physical-portfolio.raw-rendering-resource-limit-exceeded" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.evaluation-envelope-limit-exceeded" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "portfolioStage": { "const": "evaluation-envelope-validation" },
+                          "failureKind": { "const": "physical-portfolio.evaluation-envelope-limit-exceeded" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.evaluator-failed" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "portfolioStage": { "const": "evaluator" },
+                          "failureKind": { "const": "physical-portfolio.evaluator-failed" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "report": {
+              "properties": {
+                "physical_portfolio": {
+                  "properties": {
+                    "decision": {
+                      "properties": {
+                        "failure_kind": { "const": "physical-portfolio.evidence-invalid" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "outcome": {
+              "properties": {
+                "diagnostics": {
+                  "items": {
+                    "properties": {
+                      "context": {
+                        "properties": {
+                          "algorithmCode": { "const": "physical-portfolio.evidence-invalid" },
+                          "portfolioStage": { "const": "evidence-validation" },
+                          "failureKind": { "const": "physical-portfolio.evidence-invalid" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completed_phase",
+        "analysis",
+        "hypergraph",
+        "soft_generation",
+        "admissible_generation",
+        "candidate_input",
+        "candidate_search",
+        "physical_portfolio",
+        "selected_plan",
+        "bag_factor_plan",
+        "rendering"
+      ],
+      "properties": {
+        "completed_phase": {
+          "enum": [
+            "request-accepted",
+            "sql-planned",
+            "query-analyzed",
+            "hypergraph-built",
+            "soft-bags-generated",
+            "candidate-input-built",
+            "candidate-search-completed",
+            "candidate-selection-completed",
+            "rendered"
+          ]
+        },
+        "analysis": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/analysis" }
+          ]
+        },
+        "hypergraph": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/hypergraph" }
+          ]
+        },
+        "soft_generation": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/softGeneration" }
+          ]
+        },
+        "admissible_generation": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/admissibleGeneration" }
+          ]
+        },
+        "candidate_input": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/candidateInput" }
+          ]
+        },
+        "candidate_search": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/candidateSearch" }
+          ]
+        },
+        "physical_portfolio": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/physicalPortfolioAttempt" }
+          ]
+        },
+        "selected_plan": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/selectedPlan" }
+          ]
+        },
+        "bag_factor_plan": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/bagFactorPlan" }
+          ]
+        },
+        "rendering": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/rendering" }
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "completed_phase": { "enum": ["request-accepted", "sql-planned"] },
+            "analysis": { "type": "null" },
+            "hypergraph": { "type": "null" },
+            "soft_generation": { "type": "null" },
+            "admissible_generation": { "type": "null" },
+            "candidate_input": { "type": "null" },
+            "candidate_search": { "type": "null" },
+            "physical_portfolio": { "type": "null" },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "completed_phase": { "const": "query-analyzed" },
+            "analysis": { "$ref": "#/$defs/analysis" },
+            "hypergraph": { "type": "null" },
+            "soft_generation": { "type": "null" },
+            "admissible_generation": { "type": "null" },
+            "candidate_input": { "type": "null" },
+            "candidate_search": { "type": "null" },
+            "physical_portfolio": { "type": "null" },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "completed_phase": { "const": "hypergraph-built" },
+            "analysis": { "$ref": "#/$defs/analysis" },
+            "hypergraph": { "$ref": "#/$defs/hypergraph" },
+            "soft_generation": { "type": "null" },
+            "admissible_generation": { "type": "null" },
+            "candidate_input": { "type": "null" },
+            "candidate_search": { "type": "null" },
+            "physical_portfolio": { "type": "null" },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "completed_phase": { "const": "soft-bags-generated" },
+            "analysis": { "$ref": "#/$defs/analysis" },
+            "hypergraph": { "$ref": "#/$defs/hypergraph" },
+            "soft_generation": { "$ref": "#/$defs/softGeneration" },
+            "admissible_generation": { "$ref": "#/$defs/admissibleGeneration" },
+            "candidate_input": { "type": "null" },
+            "candidate_search": { "type": "null" },
+            "physical_portfolio": { "type": "null" },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "completed_phase": { "const": "candidate-input-built" },
+            "analysis": { "$ref": "#/$defs/analysis" },
+            "hypergraph": { "$ref": "#/$defs/hypergraph" },
+            "soft_generation": { "$ref": "#/$defs/softGeneration" },
+            "admissible_generation": { "$ref": "#/$defs/admissibleGeneration" },
+            "candidate_input": { "$ref": "#/$defs/candidateInput" },
+            "candidate_search": { "type": "null" },
+            "physical_portfolio": { "type": "null" },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "completed_phase": { "const": "candidate-search-completed" },
+            "analysis": { "$ref": "#/$defs/analysis" },
+            "hypergraph": { "$ref": "#/$defs/hypergraph" },
+            "soft_generation": { "$ref": "#/$defs/softGeneration" },
+            "admissible_generation": { "$ref": "#/$defs/admissibleGeneration" },
+            "candidate_input": { "$ref": "#/$defs/candidateInput" },
+            "candidate_search": {
+              "$ref": "#/$defs/candidateSearch",
+              "properties": { "decision": { "const": "rejected" } }
+            },
+            "physical_portfolio": { "type": "null" },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "completed_phase": { "const": "candidate-selection-completed" },
+            "analysis": { "$ref": "#/$defs/analysis" },
+            "hypergraph": { "$ref": "#/$defs/hypergraph" },
+            "soft_generation": { "$ref": "#/$defs/softGeneration" },
+            "admissible_generation": { "$ref": "#/$defs/admissibleGeneration" },
+            "candidate_input": { "$ref": "#/$defs/candidateInput" },
+            "candidate_search": {
+              "$ref": "#/$defs/candidateSearch",
+              "properties": { "decision": { "const": "found" } }
+            },
+            "physical_portfolio": {
+              "$ref": "#/$defs/physicalPortfolioAttempt",
+              "properties": {
+                "decision": {
+                  "oneOf": [
+                    { "$ref": "#/$defs/noAdmissibleDecision" },
+                    { "$ref": "#/$defs/failedDecision" }
+                  ]
+                }
+              }
+            },
+            "selected_plan": { "type": "null" },
+            "bag_factor_plan": { "type": "null" },
+            "rendering": { "type": "null" }
+          }
+        },
+        {
+          "properties": {
+            "completed_phase": { "const": "rendered" },
+            "analysis": { "$ref": "#/$defs/analysis" },
+            "hypergraph": { "$ref": "#/$defs/hypergraph" },
+            "soft_generation": { "$ref": "#/$defs/softGeneration" },
+            "admissible_generation": { "$ref": "#/$defs/admissibleGeneration" },
+            "candidate_input": { "$ref": "#/$defs/candidateInput" },
+            "candidate_search": {
+              "$ref": "#/$defs/candidateSearch",
+              "properties": { "decision": { "const": "found" } }
+            },
+            "physical_portfolio": {
+              "$ref": "#/$defs/physicalPortfolioAttempt",
+              "properties": {
+                "decision": { "$ref": "#/$defs/selectedDecision" }
+              }
+            },
+            "selected_plan": { "$ref": "#/$defs/selectedPlan" },
+            "bag_factor_plan": { "$ref": "#/$defs/bagFactorPlan" },
+            "rendering": { "$ref": "#/$defs/rendering" }
+          }
+        }
+      ]
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supported",
+        "relation_count",
+        "predicate_count",
+        "output_column_count",
+        "diagnostic_count"
+      ],
+      "properties": {
+        "supported": { "type": "boolean" },
+        "relation_count": { "$ref": "#/$defs/count" },
+        "predicate_count": { "$ref": "#/$defs/count" },
+        "output_column_count": { "$ref": "#/$defs/count" },
+        "diagnostic_count": { "$ref": "#/$defs/count" }
+      }
+    },
+    "hypergraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["edge_count", "variable_count", "column_count"],
+      "properties": {
+        "edge_count": { "$ref": "#/$defs/count" },
+        "variable_count": { "$ref": "#/$defs/count" },
+        "column_count": { "$ref": "#/$defs/count" }
+      }
+    },
+    "softGeneration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width_bound",
+        "enumerated_cover_count",
+        "candidate_count",
+        "witness_count",
+        "physical_cover_count",
+        "connected_physical_cover_count"
+      ],
+      "properties": {
+        "width_bound": { "$ref": "#/$defs/positive" },
+        "enumerated_cover_count": { "$ref": "#/$defs/count" },
+        "candidate_count": { "$ref": "#/$defs/count" },
+        "witness_count": { "$ref": "#/$defs/canonicalBigInt" },
+        "physical_cover_count": { "$ref": "#/$defs/canonicalBigInt" },
+        "connected_physical_cover_count": { "$ref": "#/$defs/count" }
+      }
+    },
+    "admissibleGeneration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width_bound",
+        "require_connected_cover",
+        "definition_cover_count",
+        "candidate_count",
+        "witness_count",
+        "physical_cover_count",
+        "connected_physical_cover_count"
+      ],
+      "properties": {
+        "width_bound": { "$ref": "#/$defs/positive" },
+        "require_connected_cover": { "type": "boolean" },
+        "definition_cover_count": { "$ref": "#/$defs/count" },
+        "candidate_count": { "$ref": "#/$defs/count" },
+        "witness_count": { "$ref": "#/$defs/canonicalBigInt" },
+        "physical_cover_count": { "$ref": "#/$defs/canonicalBigInt" },
+        "connected_physical_cover_count": { "$ref": "#/$defs/count" }
+      }
+    },
+    "candidateInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width_bound",
+        "require_connected_cover",
+        "candidate_bag_count"
+      ],
+      "properties": {
+        "width_bound": { "$ref": "#/$defs/positive" },
+        "require_connected_cover": { "type": "boolean" },
+        "candidate_bag_count": { "$ref": "#/$defs/count" }
+      }
+    },
+    "candidateSearch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "candidate_id_scheme",
+        "requested_limit",
+        "returned_plan_count",
+        "statistics",
+        "plans"
+      ],
+      "properties": {
+        "decision": { "enum": ["found", "rejected"] },
+        "candidate_id_scheme": { "$ref": "#/$defs/candidateIdScheme" },
+        "requested_limit": { "const": 100 },
+        "returned_plan_count": { "$ref": "#/$defs/count" },
+        "statistics": { "$ref": "#/$defs/candidateStatistics" },
+        "plans": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/candidatePlan" }
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "decision": { "const": "found" },
+            "returned_plan_count": { "minimum": 1, "maximum": 100 },
+            "plans": { "minItems": 1, "maxItems": 100 }
+          }
+        },
+        {
+          "properties": {
+            "decision": { "const": "rejected" },
+            "returned_plan_count": { "const": 0 },
+            "plans": { "maxItems": 0 }
+          }
+        }
+      ]
+    },
+    "candidateStatistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_bag_count",
+        "block_count",
+        "basis_alternative_count",
+        "satisfied_block_count",
+        "retained_partial_plan_count",
+        "combination_state_count"
+      ],
+      "properties": {
+        "candidate_bag_count": { "$ref": "#/$defs/count" },
+        "block_count": { "$ref": "#/$defs/count" },
+        "basis_alternative_count": { "$ref": "#/$defs/count" },
+        "satisfied_block_count": { "$ref": "#/$defs/count" },
+        "retained_partial_plan_count": { "$ref": "#/$defs/count" },
+        "combination_state_count": { "$ref": "#/$defs/count" }
+      }
+    },
+    "candidatePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rank",
+        "candidate_id",
+        "structural_score",
+        "cover_selection_policy",
+        "certificate",
+        "decomposition"
+      ],
+      "properties": {
+        "rank": { "$ref": "#/$defs/candidateRank" },
+        "candidate_id": { "$ref": "#/$defs/candidateId" },
+        "structural_score": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["node_count"],
+          "properties": {
+            "node_count": { "$ref": "#/$defs/positiveCanonicalBigInt" }
+          }
+        },
+        "cover_selection_policy": {
+          "const": "first_canonical_admissible_cover_v1"
+        },
+        "certificate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bag_count",
+            "component_arc_count",
+            "require_connected_cover"
+          ],
+          "properties": {
+            "bag_count": { "$ref": "#/$defs/positive" },
+            "component_arc_count": { "$ref": "#/$defs/count" },
+            "require_connected_cover": { "type": "boolean" }
+          }
+        },
+        "decomposition": { "$ref": "#/$defs/decomposition" }
+      }
+    },
+    "decomposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root_bag_id", "width", "bags", "tree_edges"],
+      "properties": {
+        "root_bag_id": { "$ref": "#/$defs/count" },
+        "width": { "$ref": "#/$defs/count" },
+        "bags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "vertices", "cover_edge_ids"],
+            "properties": {
+              "id": { "$ref": "#/$defs/count" },
+              "vertices": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/count" }
+              },
+              "cover_edge_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/count" }
+              }
+            }
+          }
+        },
+        "tree_edges": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["first", "second"],
+            "properties": {
+              "first": { "$ref": "#/$defs/count" },
+              "second": { "$ref": "#/$defs/count" }
+            }
+          }
+        }
+      }
+    },
+    "candidateResourceLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_blocks",
+        "max_basis_checks",
+        "max_basis_alternatives",
+        "max_witness_nodes",
+        "max_plan_limit",
+        "max_retained_partial_plans",
+        "max_combination_states"
+      ],
+      "properties": {
+        "max_blocks": { "$ref": "#/$defs/positive" },
+        "max_basis_checks": { "$ref": "#/$defs/positive" },
+        "max_basis_alternatives": { "$ref": "#/$defs/positive" },
+        "max_witness_nodes": { "$ref": "#/$defs/positive" },
+        "max_plan_limit": { "$ref": "#/$defs/positive" },
+        "max_retained_partial_plans": { "$ref": "#/$defs/positive" },
+        "max_combination_states": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "physicalPortfolioLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_structural_candidates",
+        "max_roots_per_candidate",
+        "max_covers_per_bag",
+        "max_cover_states_per_candidate",
+        "max_variants_per_candidate",
+        "max_raw_variants_per_session",
+        "max_unique_workloads_per_session"
+      ],
+      "properties": {
+        "max_structural_candidates": { "const": 100 },
+        "max_roots_per_candidate": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "max_covers_per_bag": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "max_cover_states_per_candidate": { "type": "integer", "minimum": 2, "maximum": 256 },
+        "max_variants_per_candidate": { "type": "integer", "minimum": 7, "maximum": 256 },
+        "max_raw_variants_per_session": { "type": "integer", "minimum": 221, "maximum": 256 },
+        "max_unique_workloads_per_session": { "type": "integer", "minimum": 221, "maximum": 256 }
+      }
+    },
+    "renderingLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_expanded_scans",
+        "max_rendered_terms",
+        "max_ctes",
+        "max_sql_characters"
+      ],
+      "properties": {
+        "max_expanded_scans": { "$ref": "#/$defs/positive" },
+        "max_rendered_terms": { "$ref": "#/$defs/positive" },
+        "max_ctes": { "$ref": "#/$defs/positive" },
+        "max_sql_characters": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "bagFactorPlanningLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_bags",
+        "max_ownership_checks",
+        "max_tree_edges",
+        "max_source_edges"
+      ],
+      "properties": {
+        "max_bags": { "$ref": "#/$defs/positive" },
+        "max_ownership_checks": { "$ref": "#/$defs/positive" },
+        "max_tree_edges": { "$ref": "#/$defs/positive" },
+        "max_source_edges": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "evaluationLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_workloads",
+        "max_stage_probes_per_workload",
+        "max_characters_per_probe",
+        "max_diagnostic_characters_per_workload",
+        "max_raw_diagnostic_characters_retained",
+        "max_explain_statements_per_session",
+        "max_diagnostic_characters_per_session",
+        "max_plan_json_characters",
+        "max_cumulative_plan_json_characters",
+        "statement_timeout_seconds",
+        "explain_statement_budget_seconds"
+      ],
+      "properties": {
+        "max_workloads": { "const": 256 },
+        "max_stage_probes_per_workload": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "max_characters_per_probe": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "max_diagnostic_characters_per_workload": { "type": "integer", "minimum": 1, "maximum": 67108864 },
+        "max_raw_diagnostic_characters_retained": { "type": "integer", "minimum": 1, "maximum": 268435456 },
+        "max_explain_statements_per_session": { "type": "integer", "minimum": 2, "maximum": 4096 },
+        "max_diagnostic_characters_per_session": { "type": "integer", "minimum": 1, "maximum": 268435456 },
+        "max_plan_json_characters": { "type": "integer", "minimum": 1, "maximum": 1048576 },
+        "max_cumulative_plan_json_characters": { "type": "integer", "minimum": 1, "maximum": 134217728 },
+        "statement_timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 30 },
+        "explain_statement_budget_seconds": { "type": "integer", "minimum": 1, "maximum": 600 }
+      }
+    },
+    "physicalPortfolioAttempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy",
+        "selection_scope",
+        "global_optimality_claim",
+        "requested_plan_limit",
+        "structural_search_exhausted_before_limit",
+        "enumeration_scheme",
+        "physical_variant_id_scheme",
+        "workload_identity_scheme",
+        "deduplication_scheme",
+        "candidate_resource_limits",
+        "physical_portfolio_limits",
+        "rendering_limits",
+        "bag_factor_planning_limits",
+        "evaluation_limits",
+        "decision"
+      ],
+      "properties": {
+        "policy": { "$ref": "#/$defs/selectionPolicy" },
+        "selection_scope": { "$ref": "#/$defs/selectionScope" },
+        "global_optimality_claim": { "const": false },
+        "requested_plan_limit": { "const": 100 },
+        "structural_search_exhausted_before_limit": { "type": "boolean" },
+        "enumeration_scheme": { "$ref": "#/$defs/enumerationScheme" },
+        "physical_variant_id_scheme": { "$ref": "#/$defs/physicalVariantIdScheme" },
+        "workload_identity_scheme": { "$ref": "#/$defs/workloadIdentityScheme" },
+        "deduplication_scheme": { "$ref": "#/$defs/deduplicationScheme" },
+        "candidate_resource_limits": { "$ref": "#/$defs/candidateResourceLimits" },
+        "physical_portfolio_limits": { "$ref": "#/$defs/physicalPortfolioLimits" },
+        "rendering_limits": { "$ref": "#/$defs/renderingLimits" },
+        "bag_factor_planning_limits": { "$ref": "#/$defs/bagFactorPlanningLimits" },
+        "evaluation_limits": { "$ref": "#/$defs/evaluationLimits" },
+        "decision": { "$ref": "#/$defs/physicalPortfolioDecision" }
+      }
+    },
+    "enumeration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enumeration_scheme",
+        "exact_logical_variant_count",
+        "cross_product_reserve_target",
+        "global_wave_search_exhausted",
+        "limits",
+        "candidates",
+        "entries"
+      ],
+      "properties": {
+        "enumeration_scheme": { "$ref": "#/$defs/enumerationScheme" },
+        "exact_logical_variant_count": { "$ref": "#/$defs/positiveCanonicalBigInt" },
+        "cross_product_reserve_target": { "type": "integer", "minimum": 0, "maximum": 16 },
+        "global_wave_search_exhausted": { "type": "boolean" },
+        "limits": { "$ref": "#/$defs/physicalPortfolioLimits" },
+        "candidates": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": { "$ref": "#/$defs/candidateEnumeration" }
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/portfolioEntry" }
+        }
+      }
+    },
+    "candidateEnumeration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "structural_rank",
+        "exact_root_count",
+        "exact_cover_assignment_count",
+        "exact_logical_variant_count",
+        "applicable_axes",
+        "retained_cover_state_count",
+        "cover_state_search_exhausted",
+        "retained_local_variant_count",
+        "retained_cross_product_state_count",
+        "local_variant_search_exhausted"
+      ],
+      "properties": {
+        "candidate_id": { "$ref": "#/$defs/candidateId" },
+        "structural_rank": { "$ref": "#/$defs/candidateRank" },
+        "exact_root_count": { "$ref": "#/$defs/positiveCanonicalBigInt" },
+        "exact_cover_assignment_count": { "$ref": "#/$defs/positiveCanonicalBigInt" },
+        "exact_logical_variant_count": { "$ref": "#/$defs/positiveCanonicalBigInt" },
+        "applicable_axes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "bottom-up",
+              "no-reduction",
+              "materialized",
+              "not-materialized",
+              "alternate-root",
+              "alternate-cover"
+            ]
+          }
+        },
+        "retained_cover_state_count": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "cover_state_search_exhausted": { "type": "boolean" },
+        "retained_local_variant_count": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "retained_cross_product_state_count": { "type": "integer", "minimum": 0, "maximum": 256 },
+        "local_variant_search_exhausted": { "type": "boolean" }
+      }
+    },
+    "portfolioEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enumeration_ordinal", "phase", "lane", "variant", "heap_key"],
+      "properties": {
+        "enumeration_ordinal": { "$ref": "#/$defs/count" },
+        "phase": {
+          "enum": [
+            "anchor",
+            "axis-sentinel",
+            "candidate-coverage",
+            "cross-product-reserve",
+            "remaining-primary-axis",
+            "residual-heap"
+          ]
+        },
+        "lane": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/nonBlank" }
+          ]
+        },
+        "variant": { "$ref": "#/$defs/physicalVariant" },
+        "heap_key": { "$ref": "#/$defs/heapKey" }
+      }
+    },
+    "physicalVariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "structural_rank",
+        "physical_variant_id",
+        "physical_variant_id_scheme",
+        "local_ordinal",
+        "execution_root_bag_id",
+        "cover_assignments",
+        "reduction_schedule",
+        "reduction_order",
+        "materialization_directive",
+        "materialization_scope"
+      ],
+      "properties": {
+        "candidate_id": { "$ref": "#/$defs/candidateId" },
+        "structural_rank": { "$ref": "#/$defs/candidateRank" },
+        "physical_variant_id": { "$ref": "#/$defs/physicalVariantId" },
+        "physical_variant_id_scheme": { "$ref": "#/$defs/physicalVariantIdScheme" },
+        "local_ordinal": { "$ref": "#/$defs/count" },
+        "execution_root_bag_id": { "$ref": "#/$defs/count" },
+        "cover_assignments": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/coverAssignment" }
+        },
+        "reduction_schedule": { "$ref": "#/$defs/reductionMode" },
+        "reduction_order": { "$ref": "#/$defs/reductionOrder" },
+        "materialization_directive": { "$ref": "#/$defs/materializationDirective" },
+        "materialization_scope": { "$ref": "#/$defs/materializationScope" }
+      }
+    },
+    "coverAssignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bag_id", "edge_ids"],
+      "properties": {
+        "bag_id": { "$ref": "#/$defs/count" },
+        "edge_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/count" }
+        }
+      }
+    },
+    "heapKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deviation_magnitude",
+        "root_ordinal",
+        "cover_index_vector",
+        "mode_ordinal",
+        "directive_ordinal",
+        "physical_variant_id"
+      ],
+      "properties": {
+        "deviation_magnitude": { "$ref": "#/$defs/canonicalBigInt" },
+        "root_ordinal": { "$ref": "#/$defs/count" },
+        "cover_index_vector": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/count" }
+        },
+        "mode_ordinal": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "directive_ordinal": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "physical_variant_id": { "$ref": "#/$defs/physicalVariantId" }
+      }
+    },
+    "rawRendering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry", "workload"],
+      "properties": {
+        "entry": { "$ref": "#/$defs/portfolioEntry" },
+        "workload": { "$ref": "#/$defs/workloadDescriptor" }
+      }
+    },
+    "workloadDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workload_id",
+        "workload_identity_scheme",
+        "stage_id_scheme",
+        "stage_order_scheme",
+        "statement_hash_scheme",
+        "character_count_scheme",
+        "rendered_statement_sha256",
+        "rendered_character_count",
+        "emitted_stage_count",
+        "materialization_directive",
+        "materialization_scope",
+        "stages"
+      ],
+      "properties": {
+        "workload_id": { "$ref": "#/$defs/workloadId" },
+        "workload_identity_scheme": { "$ref": "#/$defs/workloadIdentityScheme" },
+        "stage_id_scheme": { "const": "postgresql_renderer_stage_id_v1" },
+        "stage_order_scheme": { "const": "postgresql_cte_emission_then_terminal_v1" },
+        "statement_hash_scheme": { "const": "sha256_utf8_v1" },
+        "character_count_scheme": { "const": "jvm_utf16_code_units_v1" },
+        "rendered_statement_sha256": { "$ref": "#/$defs/sha256" },
+        "rendered_character_count": { "$ref": "#/$defs/count" },
+        "emitted_stage_count": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "materialization_directive": { "$ref": "#/$defs/materializationDirective" },
+        "materialization_scope": { "$ref": "#/$defs/materializationScope" },
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/stageWorkloadIdentity" }
+        }
+      }
+    },
+    "stageWorkloadIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage_id", "statement_sha256", "character_count", "cte_prefix_count"],
+      "properties": {
+        "stage_id": { "$ref": "#/$defs/stageId" },
+        "statement_sha256": { "$ref": "#/$defs/sha256" },
+        "character_count": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "cte_prefix_count": { "type": "integer", "minimum": 0, "maximum": 256 }
+      }
+    },
+    "workloadAlias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enumeration_ordinal",
+        "structural_rank",
+        "candidate_id",
+        "physical_variant_id"
+      ],
+      "properties": {
+        "enumeration_ordinal": { "$ref": "#/$defs/count" },
+        "structural_rank": { "$ref": "#/$defs/candidateRank" },
+        "candidate_id": { "$ref": "#/$defs/candidateId" },
+        "physical_variant_id": { "$ref": "#/$defs/physicalVariantId" }
+      }
+    },
+    "workloadGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descriptor",
+        "representative",
+        "aliases",
+        "earliest_enumeration_ordinal"
+      ],
+      "properties": {
+        "descriptor": { "$ref": "#/$defs/workloadDescriptor" },
+        "representative": { "$ref": "#/$defs/workloadAlias" },
+        "aliases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/workloadAlias" }
+        },
+        "earliest_enumeration_ordinal": { "$ref": "#/$defs/count" }
+      }
+    },
+    "deduplication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deduplication_scheme",
+        "raw_variant_count",
+        "unique_workload_count",
+        "groups"
+      ],
+      "properties": {
+        "deduplication_scheme": { "$ref": "#/$defs/deduplicationScheme" },
+        "raw_variant_count": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "unique_workload_count": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "groups": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/workloadGroup" }
+        }
+      }
+    },
+    "collisionWitness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prior", "offending"],
+      "properties": {
+        "prior": { "$ref": "#/$defs/collisionSqlVector" },
+        "offending": { "$ref": "#/$defs/collisionSqlVector" }
+      }
+    },
+    "collisionSqlVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enumeration_ordinal", "descriptor", "ordered_stage_sql"],
+      "properties": {
+        "enumeration_ordinal": { "$ref": "#/$defs/count" },
+        "descriptor": { "$ref": "#/$defs/workloadDescriptor" },
+        "ordered_stage_sql": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16777216,
+            "pattern": "\\S"
+          }
+        }
+      }
+    },
+    "explainRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum_server_version_num",
+        "materialization_scope",
+        "source",
+        "workloads"
+      ],
+      "properties": {
+        "minimum_server_version_num": { "const": 120000 },
+        "materialization_scope": { "$ref": "#/$defs/materializationScope" },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source_statement_sha256"],
+          "properties": {
+            "source_statement_sha256": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "workloads": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/explainWorkload" }
+        }
+      }
+    },
+    "explainWorkload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "stages"],
+      "properties": {
+        "group": { "$ref": "#/$defs/workloadGroup" },
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/explainStage" }
+        }
+      }
+    },
+    "explainStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage_id", "statement_sha256", "character_count", "cte_prefix_count"],
+      "properties": {
+        "stage_id": { "$ref": "#/$defs/stageId" },
+        "statement_sha256": { "$ref": "#/$defs/sha256" },
+        "character_count": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "cte_prefix_count": { "type": "integer", "minimum": 0, "maximum": 256 }
+      }
+    },
+    "evaluationUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workload_count",
+        "explain_statement_count",
+        "diagnostic_character_count"
+      ],
+      "properties": {
+        "workload_count": { "$ref": "#/$defs/positiveCanonicalBigInt" },
+        "explain_statement_count": {
+          "type": "string",
+          "pattern": "^([2-9]|[1-9][0-9]+)$"
+        },
+        "diagnostic_character_count": { "$ref": "#/$defs/positiveCanonicalBigInt" }
+      }
+    },
+    "evaluationResourceExceeded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource", "workload_id", "required", "limit"],
+      "properties": {
+        "resource": {
+          "enum": [
+            "workloads",
+            "stage-probes-per-workload",
+            "characters-per-probe",
+            "diagnostic-characters-per-workload",
+            "raw-diagnostic-characters-retained",
+            "explain-statements-per-session",
+            "diagnostic-characters-per-session",
+            "plan-json-characters",
+            "cumulative-plan-json-characters",
+            "statement-timeout-seconds",
+            "explain-statement-budget-seconds"
+          ]
+        },
+        "workload_id": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/workloadId" }
+          ]
+        },
+        "required": { "$ref": "#/$defs/positiveCanonicalBigInt" },
+        "limit": { "$ref": "#/$defs/positive" }
+      }
+    },
+    "optimizerEstimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "metric",
+        "units",
+        "explain_format",
+        "analyze",
+        "settings",
+        "estimated",
+        "runtime_measured",
+        "startup_cost",
+        "plan_total_cost",
+        "plan_rows",
+        "plan_width"
+      ],
+      "properties": {
+        "source": { "const": "postgresql_explain_format_json_analyze_false_v1" },
+        "metric": { "const": "plan_total_cost" },
+        "units": { "const": "postgresql_cost_units" },
+        "explain_format": { "const": "json" },
+        "analyze": { "const": false },
+        "settings": { "const": true },
+        "estimated": { "const": true },
+        "runtime_measured": { "const": false },
+        "startup_cost": { "type": "number", "minimum": 0 },
+        "plan_total_cost": { "type": "number", "minimum": 0 },
+        "plan_rows": { "type": "number", "minimum": 0 },
+        "plan_width": { "$ref": "#/$defs/count" }
+      }
+    },
+    "costProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "server_version_num",
+        "planner_settings_fingerprint_sha256",
+        "planner_settings_fingerprint_scheme",
+        "planner_setting_count"
+      ],
+      "properties": {
+        "server_version_num": { "type": "integer", "minimum": 120000 },
+        "planner_settings_fingerprint_sha256": { "$ref": "#/$defs/sha256" },
+        "planner_settings_fingerprint_scheme": {
+          "const": "postgresql_planner_settings_utf8_length_prefixed_v1"
+        },
+        "planner_setting_count": { "const": 53 }
+      }
+    },
+    "sourceOptimizerEstimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_statement_sha256", "optimizer_estimate"],
+      "properties": {
+        "source_statement_sha256": { "$ref": "#/$defs/sha256" },
+        "optimizer_estimate": { "$ref": "#/$defs/optimizerEstimate" }
+      }
+    },
+    "rowGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factor", "ratio_numerator", "ratio_denominator", "within_guard"],
+      "properties": {
+        "factor": { "const": 10 },
+        "ratio_numerator": { "type": "number", "minimum": 0 },
+        "ratio_denominator": { "type": "number", "minimum": 1 },
+        "within_guard": { "type": "boolean" }
+      }
+    },
+    "explainObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workload_id",
+        "representative_physical_variant_id",
+        "stage_id",
+        "statement_sha256",
+        "optimizer_estimate"
+      ],
+      "properties": {
+        "workload_id": { "$ref": "#/$defs/workloadId" },
+        "representative_physical_variant_id": { "$ref": "#/$defs/physicalVariantId" },
+        "stage_id": { "$ref": "#/$defs/stageId" },
+        "statement_sha256": { "$ref": "#/$defs/sha256" },
+        "optimizer_estimate": { "$ref": "#/$defs/optimizerEstimate" }
+      }
+    },
+    "explainBatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provenance", "source", "observations"],
+      "properties": {
+        "provenance": { "$ref": "#/$defs/costProvenance" },
+        "source": { "$ref": "#/$defs/sourceOptimizerEstimate" },
+        "observations": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": { "$ref": "#/$defs/explainObservation" }
+        }
+      }
+    },
+    "explainFailure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "stage",
+        "failed_statement_index",
+        "source",
+        "completed",
+        "requested_stage_statement_count",
+        "observed_server_version_num",
+        "required_server_version_num"
+      ],
+      "properties": {
+        "code": {
+          "enum": [
+            "explain.evaluator-unavailable",
+            "explain.connection-unavailable",
+            "explain.unsafe-rendered-statement",
+            "explain.session-configuration-failed",
+            "explain.provenance-unavailable",
+            "explain.physical-portfolio-unsupported-server-version",
+            "explain.statement-timeout",
+            "explain.statement-failed",
+            "explain.plan-json-oversized",
+            "explain.plan-json-malformed",
+            "explain.provenance-changed",
+            "explain.cleanup-failed",
+            "explain.evaluator-contract-violation",
+            "explain.session-resource-limit-exceeded"
+          ]
+        },
+        "stage": {
+          "enum": ["session", "version-preflight", "source-explain", "stage-explain", "final-provenance"]
+        },
+        "failed_statement_index": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/count" }
+          ]
+        },
+        "source": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/sourceOptimizerEstimate" }
+          ]
+        },
+        "completed": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": { "$ref": "#/$defs/explainObservation" }
+        },
+        "requested_stage_statement_count": { "type": "integer", "minimum": 1, "maximum": 4096 },
+        "observed_server_version_num": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/positive" }
+          ]
+        },
+        "required_server_version_num": {
+          "oneOf": [
+            { "type": "null" },
+            { "const": 120000 }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "stage": { "const": "session" },
+                "code": {
+                  "enum": [
+                    "explain.evaluator-unavailable",
+                    "explain.connection-unavailable",
+                    "explain.session-configuration-failed",
+                    "explain.statement-timeout",
+                    "explain.cleanup-failed",
+                    "explain.evaluator-contract-violation",
+                    "explain.session-resource-limit-exceeded"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "stage": { "const": "version-preflight" },
+                "code": {
+                  "enum": [
+                    "explain.provenance-unavailable",
+                    "explain.physical-portfolio-unsupported-server-version",
+                    "explain.statement-timeout",
+                    "explain.cleanup-failed"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "stage": { "enum": ["source-explain", "stage-explain"] },
+                "code": {
+                  "enum": [
+                    "explain.unsafe-rendered-statement",
+                    "explain.statement-timeout",
+                    "explain.statement-failed",
+                    "explain.plan-json-oversized",
+                    "explain.plan-json-malformed",
+                    "explain.cleanup-failed"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "stage": { "const": "final-provenance" },
+                "code": {
+                  "enum": [
+                    "explain.provenance-unavailable",
+                    "explain.physical-portfolio-unsupported-server-version",
+                    "explain.provenance-changed",
+                    "explain.statement-timeout",
+                    "explain.cleanup-failed"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "code": { "const": "explain.physical-portfolio-unsupported-server-version" }
+            }
+          },
+          "then": {
+            "properties": {
+              "observed_server_version_num": { "type": "integer", "minimum": 1, "maximum": 119999 },
+              "required_server_version_num": { "const": 120000 }
+            }
+          },
+          "else": {
+            "properties": {
+              "observed_server_version_num": { "type": "null" },
+              "required_server_version_num": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "stage": { "const": "stage-explain" } }
+          },
+          "then": {
+            "properties": {
+              "failed_statement_index": { "$ref": "#/$defs/count" },
+              "source": { "$ref": "#/$defs/sourceOptimizerEstimate" }
+            }
+          },
+          "else": {
+            "properties": { "failed_statement_index": { "type": "null" } }
+          }
+        }
+      ]
+    },
+    "semijoinMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pass",
+        "ordinal",
+        "target_bag_id",
+        "source_bag_id",
+        "separator_variable_ids"
+      ],
+      "properties": {
+        "pass": { "enum": ["bottom-up", "top-down"] },
+        "ordinal": { "$ref": "#/$defs/count" },
+        "target_bag_id": { "$ref": "#/$defs/count" },
+        "source_bag_id": { "$ref": "#/$defs/count" },
+        "separator_variable_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/count" }
+        }
+      }
+    },
+    "stageTrace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage_id",
+        "kind",
+        "physical_form",
+        "physical_cte_name",
+        "logical_bag_ids",
+        "logical_edge_ids",
+        "semijoin_members",
+        "input_stage_ids"
+      ],
+      "properties": {
+        "stage_id": { "$ref": "#/$defs/stageId" },
+        "kind": {
+          "enum": ["support", "initial-factor", "fused-reduction", "final-reconstruction"]
+        },
+        "physical_form": {
+          "enum": [
+            "elided",
+            "planner-controlled-cte",
+            "materialized-cte",
+            "not-materialized-cte",
+            "terminal-select"
+          ]
+        },
+        "physical_cte_name": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/nonBlank" }
+          ]
+        },
+        "logical_bag_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/count" }
+        },
+        "logical_edge_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/count" }
+        },
+        "semijoin_members": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/semijoinMember" }
+        },
+        "input_stage_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stageId" }
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "stage_id": { "type": "string", "pattern": "^support:b(0|[1-9][0-9]*)$" },
+            "kind": { "const": "support" },
+            "physical_form": {
+              "enum": [
+                "elided",
+                "planner-controlled-cte",
+                "materialized-cte",
+                "not-materialized-cte"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "stage_id": { "type": "string", "pattern": "^factor:b(0|[1-9][0-9]*):v0$" },
+            "kind": { "const": "initial-factor" },
+            "physical_form": {
+              "enum": ["planner-controlled-cte", "materialized-cte", "not-materialized-cte"]
+            }
+          }
+        },
+        {
+          "properties": {
+            "stage_id": { "type": "string", "pattern": "^factor:b(0|[1-9][0-9]*):v[1-9][0-9]*$" },
+            "kind": { "const": "fused-reduction" },
+            "physical_form": {
+              "enum": ["planner-controlled-cte", "materialized-cte", "not-materialized-cte"]
+            }
+          }
+        },
+        {
+          "properties": {
+            "stage_id": { "const": "final-reconstruction" },
+            "kind": { "const": "final-reconstruction" },
+            "physical_form": { "const": "terminal-select" }
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "physical_form": { "enum": ["elided", "terminal-select"] }
+            }
+          },
+          "then": {
+            "properties": { "physical_cte_name": { "type": "null" } }
+          },
+          "else": {
+            "properties": { "physical_cte_name": { "$ref": "#/$defs/nonBlank" } }
+          }
+        }
+      ]
+    },
+    "stageEvaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trace",
+        "diagnostic_statement_sha256",
+        "diagnostic_character_count",
+        "diagnostic_cte_prefix_count",
+        "optimizer_estimate",
+        "final_frontier"
+      ],
+      "properties": {
+        "trace": { "$ref": "#/$defs/stageTrace" },
+        "diagnostic_statement_sha256": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/sha256" }
+          ]
+        },
+        "diagnostic_character_count": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "integer", "minimum": 1, "maximum": 16777216 }
+          ]
+        },
+        "diagnostic_cte_prefix_count": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "integer", "minimum": 0, "maximum": 256 }
+          ]
+        },
+        "optimizer_estimate": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/optimizerEstimate" }
+          ]
+        },
+        "final_frontier": { "type": "boolean" }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "trace": {
+              "$ref": "#/$defs/stageTrace",
+              "properties": { "physical_form": { "const": "elided" } }
+            },
+            "diagnostic_statement_sha256": { "type": "null" },
+            "diagnostic_character_count": { "type": "null" },
+            "diagnostic_cte_prefix_count": { "type": "null" },
+            "optimizer_estimate": { "type": "null" },
+            "final_frontier": { "const": false }
+          }
+        },
+        {
+          "properties": {
+            "trace": {
+              "$ref": "#/$defs/stageTrace",
+              "properties": {
+                "physical_form": {
+                  "enum": [
+                    "planner-controlled-cte",
+                    "materialized-cte",
+                    "not-materialized-cte",
+                    "terminal-select"
+                  ]
+                }
+              }
+            },
+            "diagnostic_statement_sha256": { "$ref": "#/$defs/sha256" },
+            "diagnostic_character_count": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+            "diagnostic_cte_prefix_count": { "type": "integer", "minimum": 0, "maximum": 256 },
+            "optimizer_estimate": { "$ref": "#/$defs/optimizerEstimate" }
+          }
+        }
+      ]
+    },
+    "portfolioScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_all_named_stage_plan_rows_times_plan_width",
+        "sum_final_frontier_plan_rows_times_plan_width",
+        "final_plan_total_cost",
+        "structural_rank",
+        "candidate_id",
+        "representative_physical_variant_id"
+      ],
+      "properties": {
+        "max_all_named_stage_plan_rows_times_plan_width": { "type": "number", "minimum": 0 },
+        "sum_final_frontier_plan_rows_times_plan_width": { "type": "number", "minimum": 0 },
+        "final_plan_total_cost": { "type": "number", "minimum": 0 },
+        "structural_rank": { "$ref": "#/$defs/candidateRank" },
+        "candidate_id": { "$ref": "#/$defs/candidateId" },
+        "representative_physical_variant_id": { "$ref": "#/$defs/physicalVariantId" }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workload",
+        "source",
+        "stages",
+        "final_frontier_stage_ids",
+        "row_guard",
+        "score",
+        "score_scheme",
+        "final_frontier_scheme",
+        "numeric_envelope_scheme"
+      ],
+      "properties": {
+        "workload": { "$ref": "#/$defs/workloadGroup" },
+        "source": { "$ref": "#/$defs/sourceOptimizerEstimate" },
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/stageEvaluation" }
+        },
+        "final_frontier_stage_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/stageId" }
+        },
+        "row_guard": { "$ref": "#/$defs/rowGuard" },
+        "score": { "$ref": "#/$defs/portfolioScore" },
+        "score_scheme": { "const": "postgresql_physical_portfolio_final_frontier_score_v1" },
+        "final_frontier_scheme": { "const": "postgresql_emitted_support_plus_latest_factor_per_bag_v1" },
+        "numeric_envelope_scheme": { "const": "postgresql_factor_numeric_precision_scale_v1" }
+      }
+    },
+    "scoreOrder": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "prefixItems": [
+        { "const": "max_all_named_stage_plan_rows_times_plan_width" },
+        { "const": "sum_final_frontier_plan_rows_times_plan_width" },
+        { "const": "final_plan_total_cost" },
+        { "const": "structural_rank" },
+        { "const": "candidate_id" },
+        { "const": "representative_physical_variant_id" }
+      ],
+      "items": false
+    },
+    "selectedDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "policy",
+        "selection_scope",
+        "score_order",
+        "enumeration",
+        "raw_renderings",
+        "deduplication",
+        "explain_request",
+        "evaluation_limits",
+        "evaluation_usage",
+        "resource_exceeded",
+        "explain_failure",
+        "explain_batch",
+        "evaluations",
+        "selected_workload_id",
+        "selected_physical_variant_id"
+      ],
+      "properties": {
+        "status": { "const": "selected" },
+        "policy": { "$ref": "#/$defs/selectionPolicy" },
+        "selection_scope": { "$ref": "#/$defs/selectionScope" },
+        "score_order": { "$ref": "#/$defs/scoreOrder" },
+        "enumeration": { "$ref": "#/$defs/enumeration" },
+        "raw_renderings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/rawRendering" }
+        },
+        "deduplication": { "$ref": "#/$defs/deduplication" },
+        "explain_request": { "$ref": "#/$defs/explainRequest" },
+        "evaluation_limits": { "$ref": "#/$defs/evaluationLimits" },
+        "evaluation_usage": { "$ref": "#/$defs/evaluationUsage" },
+        "resource_exceeded": { "type": "null" },
+        "explain_failure": { "type": "null" },
+        "explain_batch": {
+          "$ref": "#/$defs/explainBatch",
+          "properties": { "observations": { "minItems": 1 } }
+        },
+        "evaluations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/evaluation" }
+        },
+        "selected_workload_id": { "$ref": "#/$defs/workloadId" },
+        "selected_physical_variant_id": { "$ref": "#/$defs/physicalVariantId" }
+      }
+    },
+    "noAdmissibleDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "policy",
+        "selection_scope",
+        "score_order",
+        "enumeration",
+        "raw_renderings",
+        "deduplication",
+        "explain_request",
+        "evaluation_limits",
+        "evaluation_usage",
+        "resource_exceeded",
+        "explain_failure",
+        "explain_batch",
+        "evaluations"
+      ],
+      "properties": {
+        "status": { "const": "no_admissible" },
+        "policy": { "$ref": "#/$defs/selectionPolicy" },
+        "selection_scope": { "$ref": "#/$defs/selectionScope" },
+        "score_order": { "$ref": "#/$defs/scoreOrder" },
+        "enumeration": { "$ref": "#/$defs/enumeration" },
+        "raw_renderings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/rawRendering" }
+        },
+        "deduplication": { "$ref": "#/$defs/deduplication" },
+        "explain_request": { "$ref": "#/$defs/explainRequest" },
+        "evaluation_limits": { "$ref": "#/$defs/evaluationLimits" },
+        "evaluation_usage": { "$ref": "#/$defs/evaluationUsage" },
+        "resource_exceeded": { "type": "null" },
+        "explain_failure": { "type": "null" },
+        "explain_batch": {
+          "$ref": "#/$defs/explainBatch",
+          "properties": { "observations": { "minItems": 1 } }
+        },
+        "evaluations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/evaluation" }
+        }
+      }
+    },
+    "enumerationLimitError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^physical-portfolio\\.limit\\.invalid\\.\\S+$"
+        },
+        "message": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "enumerationFailure": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "path"],
+          "properties": {
+            "code": { "const": "physical-portfolio.input.missing" },
+            "message": { "$ref": "#/$defs/nonBlank" },
+            "path": { "$ref": "#/$defs/nonBlank" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "detail"],
+          "properties": {
+            "code": { "const": "physical-portfolio.candidate-set.invalid" },
+            "message": { "$ref": "#/$defs/nonBlank" },
+            "detail": { "$ref": "#/$defs/nonBlank" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "limit_errors"],
+          "properties": {
+            "code": { "const": "physical-portfolio.limits.invalid" },
+            "message": { "$ref": "#/$defs/nonBlank" },
+            "limit_errors": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/enumerationLimitError" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message",
+            "resource",
+            "candidate_id",
+            "bag_id",
+            "required",
+            "limit"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "pattern": "^physical-portfolio\\.resource\\.exceeded\\.(structural-candidates|roots-per-candidate|covers-per-bag|cover-states-per-candidate|variants-per-candidate|raw-variants-per-session|unique-workloads-per-session)$"
+            },
+            "message": { "$ref": "#/$defs/nonBlank" },
+            "resource": {
+              "enum": [
+                "structural-candidates",
+                "roots-per-candidate",
+                "covers-per-bag",
+                "cover-states-per-candidate",
+                "variants-per-candidate",
+                "raw-variants-per-session",
+                "unique-workloads-per-session"
+              ]
+            },
+            "candidate_id": {
+              "oneOf": [
+                { "type": "null" },
+                { "$ref": "#/$defs/candidateId" }
+              ]
+            },
+            "bag_id": {
+              "oneOf": [
+                { "type": "null" },
+                { "$ref": "#/$defs/count" }
+              ]
+            },
+            "required": { "$ref": "#/$defs/positiveCanonicalBigInt" },
+            "limit": { "$ref": "#/$defs/positive" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "candidate_id", "bag_id"],
+          "properties": {
+            "code": { "const": "physical-portfolio.cover.missing" },
+            "message": { "$ref": "#/$defs/nonBlank" },
+            "candidate_id": { "$ref": "#/$defs/candidateId" },
+            "bag_id": { "$ref": "#/$defs/count" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "candidate_id", "bag_id"],
+          "properties": {
+            "code": { "const": "physical-portfolio.cover.structural-not-admissible" },
+            "message": { "$ref": "#/$defs/nonBlank" },
+            "candidate_id": { "$ref": "#/$defs/candidateId" },
+            "bag_id": { "$ref": "#/$defs/count" }
+          }
+        }
+      ]
+    },
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "$ref": "#/$defs/nonBlank" },
+        "message": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "failedDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "policy",
+        "selection_scope",
+        "failure_kind",
+        "failure_stage",
+        "detail_code",
+        "failed_enumeration_ordinal",
+        "enumeration_failure",
+        "planning_problems",
+        "rendering_problems",
+        "enumeration",
+        "raw_render_prefix",
+        "deduplication",
+        "explain_request",
+        "evaluation_limits",
+        "evaluation_usage",
+        "resource_exceeded",
+        "explain_failure",
+        "explain_batch",
+        "completed_evaluations"
+      ],
+      "properties": {
+        "status": { "const": "failed" },
+        "policy": { "$ref": "#/$defs/selectionPolicy" },
+        "selection_scope": { "$ref": "#/$defs/selectionScope" },
+        "failure_kind": {
+          "enum": [
+            "physical-portfolio.enumeration-failed",
+            "physical-portfolio.candidate-planning-failed",
+            "physical-portfolio.stage-diagnostic-rendering-failed",
+            "physical-portfolio.workload-identity-collision",
+            "physical-portfolio.raw-rendering-resource-limit-exceeded",
+            "physical-portfolio.evaluation-envelope-limit-exceeded",
+            "physical-portfolio.evaluator-failed",
+            "physical-portfolio.evidence-invalid"
+          ]
+        },
+        "failure_stage": {
+          "enum": [
+            "enumeration",
+            "candidate-planning",
+            "stage-diagnostic-rendering",
+            "workload-deduplication",
+            "raw-rendering-resource-validation",
+            "evaluation-envelope-validation",
+            "evaluator",
+            "evidence-validation"
+          ]
+        },
+        "detail_code": { "$ref": "#/$defs/nonBlank" },
+        "failed_enumeration_ordinal": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/count" }
+          ]
+        },
+        "enumeration_failure": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/enumerationFailure" }
+          ]
+        },
+        "planning_problems": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/problem" }
+        },
+        "rendering_problems": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/problem" }
+        },
+        "enumeration": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/enumeration" }
+          ]
+        },
+        "raw_render_prefix": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/rawRendering" }
+        },
+        "deduplication": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/deduplication" }
+          ]
+        },
+        "explain_request": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/explainRequest" }
+          ]
+        },
+        "evaluation_limits": { "$ref": "#/$defs/evaluationLimits" },
+        "evaluation_usage": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/evaluationUsage" }
+          ]
+        },
+        "resource_exceeded": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/evaluationResourceExceeded" }
+          ]
+        },
+        "explain_failure": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/explainFailure" }
+          ]
+        },
+        "explain_batch": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/explainBatch" }
+          ]
+        },
+        "completed_evaluations": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/evaluation" }
+        },
+        "collision_witness": { "$ref": "#/$defs/collisionWitness" }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.enumeration-failed" },
+            "failure_stage": { "const": "enumeration" },
+            "failed_enumeration_ordinal": { "type": "null" },
+            "enumeration_failure": { "$ref": "#/$defs/enumerationFailure" },
+            "planning_problems": { "maxItems": 0 },
+            "rendering_problems": { "maxItems": 0 },
+            "enumeration": { "type": "null" },
+            "raw_render_prefix": { "maxItems": 0 },
+            "deduplication": { "type": "null" },
+            "explain_request": { "type": "null" },
+            "evaluation_usage": { "type": "null" },
+            "resource_exceeded": { "type": "null" },
+            "explain_failure": { "type": "null" },
+            "explain_batch": { "type": "null" },
+            "completed_evaluations": { "maxItems": 0 }
+          },
+          "not": { "required": ["collision_witness"] }
+        },
+        {
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.candidate-planning-failed" },
+            "failure_stage": { "const": "candidate-planning" },
+            "failed_enumeration_ordinal": { "$ref": "#/$defs/count" },
+            "enumeration_failure": { "type": "null" },
+            "planning_problems": { "minItems": 1 },
+            "rendering_problems": { "maxItems": 0 },
+            "enumeration": { "$ref": "#/$defs/enumeration" },
+            "deduplication": { "type": "null" },
+            "explain_request": { "type": "null" },
+            "evaluation_usage": { "type": "null" },
+            "resource_exceeded": { "type": "null" },
+            "explain_failure": { "type": "null" },
+            "explain_batch": { "type": "null" },
+            "completed_evaluations": { "maxItems": 0 }
+          },
+          "not": { "required": ["collision_witness"] }
+        },
+        {
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.stage-diagnostic-rendering-failed" },
+            "failure_stage": { "const": "stage-diagnostic-rendering" },
+            "failed_enumeration_ordinal": { "$ref": "#/$defs/count" },
+            "enumeration_failure": { "type": "null" },
+            "planning_problems": { "maxItems": 0 },
+            "rendering_problems": { "minItems": 1 },
+            "enumeration": { "$ref": "#/$defs/enumeration" },
+            "deduplication": { "type": "null" },
+            "explain_request": { "type": "null" },
+            "evaluation_usage": { "type": "null" },
+            "resource_exceeded": { "type": "null" },
+            "explain_failure": { "type": "null" },
+            "explain_batch": { "type": "null" },
+            "completed_evaluations": { "maxItems": 0 }
+          },
+          "not": { "required": ["collision_witness"] }
+        },
+        {
+          "required": ["collision_witness"],
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.workload-identity-collision" },
+            "failure_stage": { "const": "workload-deduplication" },
+            "detail_code": { "const": "physical-portfolio.workload-identity-collision" },
+            "failed_enumeration_ordinal": { "$ref": "#/$defs/count" },
+            "enumeration_failure": { "type": "null" },
+            "planning_problems": { "maxItems": 0 },
+            "rendering_problems": { "maxItems": 0 },
+            "enumeration": { "$ref": "#/$defs/enumeration" },
+            "raw_render_prefix": { "minItems": 1 },
+            "deduplication": { "type": "null" },
+            "explain_request": { "type": "null" },
+            "evaluation_usage": { "type": "null" },
+            "resource_exceeded": { "type": "null" },
+            "explain_failure": { "type": "null" },
+            "explain_batch": { "type": "null" },
+            "completed_evaluations": { "maxItems": 0 },
+            "collision_witness": { "$ref": "#/$defs/collisionWitness" }
+          }
+        },
+        {
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.raw-rendering-resource-limit-exceeded" },
+            "failure_stage": { "const": "raw-rendering-resource-validation" },
+            "failed_enumeration_ordinal": { "$ref": "#/$defs/count" },
+            "enumeration_failure": { "type": "null" },
+            "planning_problems": { "maxItems": 0 },
+            "rendering_problems": { "maxItems": 0 },
+            "enumeration": { "$ref": "#/$defs/enumeration" },
+            "raw_render_prefix": { "minItems": 1 },
+            "deduplication": { "type": "null" },
+            "explain_request": { "type": "null" },
+            "evaluation_usage": { "type": "null" },
+            "resource_exceeded": { "$ref": "#/$defs/evaluationResourceExceeded" },
+            "explain_failure": { "type": "null" },
+            "explain_batch": { "type": "null" },
+            "completed_evaluations": { "maxItems": 0 }
+          },
+          "not": { "required": ["collision_witness"] }
+        },
+        {
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.evaluation-envelope-limit-exceeded" },
+            "failure_stage": { "const": "evaluation-envelope-validation" },
+            "failed_enumeration_ordinal": { "type": "null" },
+            "enumeration_failure": { "type": "null" },
+            "planning_problems": { "maxItems": 0 },
+            "rendering_problems": { "maxItems": 0 },
+            "enumeration": { "$ref": "#/$defs/enumeration" },
+            "raw_render_prefix": { "minItems": 1 },
+            "deduplication": { "$ref": "#/$defs/deduplication" },
+            "explain_request": { "$ref": "#/$defs/explainRequest" },
+            "evaluation_usage": { "type": "null" },
+            "resource_exceeded": { "$ref": "#/$defs/evaluationResourceExceeded" },
+            "explain_failure": { "type": "null" },
+            "explain_batch": { "type": "null" },
+            "completed_evaluations": { "maxItems": 0 }
+          },
+          "not": { "required": ["collision_witness"] }
+        },
+        {
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.evaluator-failed" },
+            "failure_stage": { "const": "evaluator" },
+            "failed_enumeration_ordinal": { "type": "null" },
+            "enumeration_failure": { "type": "null" },
+            "planning_problems": { "maxItems": 0 },
+            "rendering_problems": { "maxItems": 0 },
+            "enumeration": { "$ref": "#/$defs/enumeration" },
+            "raw_render_prefix": { "minItems": 1 },
+            "deduplication": { "$ref": "#/$defs/deduplication" },
+            "explain_request": { "$ref": "#/$defs/explainRequest" },
+            "evaluation_usage": { "$ref": "#/$defs/evaluationUsage" },
+            "resource_exceeded": { "type": "null" },
+            "explain_failure": { "$ref": "#/$defs/explainFailure" },
+            "explain_batch": { "type": "null" },
+            "completed_evaluations": { "maxItems": 0 }
+          },
+          "not": { "required": ["collision_witness"] }
+        },
+        {
+          "properties": {
+            "failure_kind": { "const": "physical-portfolio.evidence-invalid" },
+            "failure_stage": { "const": "evidence-validation" },
+            "detail_code": { "const": "physical-portfolio.evidence-invalid" },
+            "failed_enumeration_ordinal": { "type": "null" },
+            "enumeration_failure": { "type": "null" },
+            "planning_problems": { "maxItems": 0 },
+            "rendering_problems": { "maxItems": 0 },
+            "enumeration": { "$ref": "#/$defs/enumeration" },
+            "raw_render_prefix": { "minItems": 1 },
+            "deduplication": { "$ref": "#/$defs/deduplication" },
+            "explain_request": { "$ref": "#/$defs/explainRequest" },
+            "evaluation_usage": { "$ref": "#/$defs/evaluationUsage" },
+            "resource_exceeded": { "type": "null" },
+            "explain_failure": { "type": "null" },
+            "explain_batch": { "$ref": "#/$defs/explainBatch" }
+          },
+          "not": { "required": ["collision_witness"] }
+        }
+      ]
+    },
+    "physicalPortfolioDecision": {
+      "oneOf": [
+        { "$ref": "#/$defs/selectedDecision" },
+        { "$ref": "#/$defs/noAdmissibleDecision" },
+        { "$ref": "#/$defs/failedDecision" }
+      ]
+    },
+    "selectedPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selection_policy",
+        "selection_scope",
+        "cost_selected",
+        "estimated_cost_selected",
+        "measured_runtime_selected",
+        "uses_catalog_statistics",
+        "uses_execution_feedback",
+        "structural_plan",
+        "physical_variant",
+        "enumeration_ordinal",
+        "enumeration_phase",
+        "enumeration_lane",
+        "selected_workload_id"
+      ],
+      "properties": {
+        "selection_policy": { "$ref": "#/$defs/selectionPolicy" },
+        "selection_scope": { "$ref": "#/$defs/selectionScope" },
+        "cost_selected": { "const": true },
+        "estimated_cost_selected": { "const": true },
+        "measured_runtime_selected": { "const": false },
+        "uses_catalog_statistics": { "const": true },
+        "uses_execution_feedback": { "const": false },
+        "structural_plan": { "$ref": "#/$defs/candidatePlan" },
+        "physical_variant": { "$ref": "#/$defs/physicalVariant" },
+        "enumeration_ordinal": { "$ref": "#/$defs/count" },
+        "enumeration_phase": {
+          "enum": [
+            "anchor",
+            "axis-sentinel",
+            "candidate-coverage",
+            "cross-product-reserve",
+            "remaining-primary-axis",
+            "residual-heap"
+          ]
+        },
+        "enumeration_lane": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/nonBlank" }
+          ]
+        },
+        "selected_workload_id": { "$ref": "#/$defs/workloadId" }
+      }
+    },
+    "bagFactorPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_bag_id",
+        "width_bound",
+        "require_connected_cover",
+        "factor_count",
+        "ownership_count",
+        "arc_count",
+        "bottom_up_step_count",
+        "top_down_step_count"
+      ],
+      "properties": {
+        "root_bag_id": { "$ref": "#/$defs/count" },
+        "width_bound": { "$ref": "#/$defs/positive" },
+        "require_connected_cover": { "type": "boolean" },
+        "factor_count": { "$ref": "#/$defs/positive" },
+        "ownership_count": { "$ref": "#/$defs/count" },
+        "arc_count": { "$ref": "#/$defs/count" },
+        "bottom_up_step_count": { "$ref": "#/$defs/count" },
+        "top_down_step_count": { "$ref": "#/$defs/count" }
+      }
+    },
+    "rendering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rendered_statement_sha256",
+        "output_column_count",
+        "expanded_scan_count",
+        "materialized_distinct_support_count",
+        "rendered_term_count",
+        "cte_count",
+        "sql_character_count",
+        "reduction_schedule",
+        "reduction_order",
+        "materialization_directive",
+        "materialization_scope",
+        "canonical_bottom_up_step_count",
+        "canonical_top_down_step_count",
+        "selected_bottom_up_step_count",
+        "selected_top_down_step_count",
+        "physical_reduction_cte_count",
+        "stages"
+      ],
+      "properties": {
+        "rendered_statement_sha256": { "$ref": "#/$defs/sha256" },
+        "output_column_count": { "$ref": "#/$defs/positive" },
+        "expanded_scan_count": { "$ref": "#/$defs/count" },
+        "materialized_distinct_support_count": { "$ref": "#/$defs/count" },
+        "rendered_term_count": { "$ref": "#/$defs/count" },
+        "cte_count": { "$ref": "#/$defs/count" },
+        "sql_character_count": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "reduction_schedule": { "$ref": "#/$defs/reductionMode" },
+        "reduction_order": { "$ref": "#/$defs/reductionOrder" },
+        "materialization_directive": { "$ref": "#/$defs/materializationDirective" },
+        "materialization_scope": { "$ref": "#/$defs/materializationScope" },
+        "canonical_bottom_up_step_count": { "$ref": "#/$defs/count" },
+        "canonical_top_down_step_count": { "$ref": "#/$defs/count" },
+        "selected_bottom_up_step_count": { "$ref": "#/$defs/count" },
+        "selected_top_down_step_count": { "$ref": "#/$defs/count" },
+        "physical_reduction_cte_count": { "$ref": "#/$defs/count" },
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/stageTrace" }
+        }
+      }
+    }
+  }
+}

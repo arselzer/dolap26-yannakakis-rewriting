@@ -1,0 +1,24 @@
+.bsp/
+.idea/
+.metals/
+.scala-build/
+.vscode/
+**/target/
+
+.DS_Store
+*.class
+*.log
+
+# Python bytecode is local build output, not benchmark evidence.
+__pycache__/
+*.pyc
+
+# Local credentials and secret-manager exports. Keep only empty examples.
+.env
+.env.*
+!.env.example
+*.credentials
+*.secret
+
+benchmarks/postgres-data/
+query-rewriter/output/
