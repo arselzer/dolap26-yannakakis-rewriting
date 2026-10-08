@@ -1,0 +1,34 @@
+{
+  "arcs": [],
+  "cost": null,
+  "cost_profile": null,
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        0,
+        1,
+        4
+      ],
+      "owned": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  ],
+  "origin": "structural",
+  "relation_oids": {},
+  "root": 0
+}

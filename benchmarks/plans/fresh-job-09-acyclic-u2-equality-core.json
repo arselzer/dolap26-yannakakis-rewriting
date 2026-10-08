@@ -1,0 +1,120 @@
+{
+  "arcs": [
+    {
+      "child": 1,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    },
+    {
+      "child": 2,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    },
+    {
+      "child": 3,
+      "parent": 2,
+      "separator": [
+        5
+      ]
+    },
+    {
+      "child": 4,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    }
+  ],
+  "cost": null,
+  "cost_profile": null,
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        2
+      ],
+      "owned": [
+        0,
+        1,
+        2,
+        5,
+        6,
+        7
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "bag": 1,
+      "cover": [
+        4
+      ],
+      "owned": [
+        3,
+        4
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        4
+      ]
+    },
+    {
+      "bag": 2,
+      "cover": [
+        8
+      ],
+      "owned": [
+        8,
+        9
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        5
+      ]
+    },
+    {
+      "bag": 3,
+      "cover": [
+        12
+      ],
+      "owned": [
+        12,
+        13
+      ],
+      "parent": 2,
+      "vertices": [
+        5,
+        7
+      ]
+    },
+    {
+      "bag": 4,
+      "cover": [
+        10
+      ],
+      "owned": [
+        10,
+        11
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        6
+      ]
+    }
+  ],
+  "origin": "structural",
+  "relation_oids": {},
+  "root": 0
+}

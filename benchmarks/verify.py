@@ -5,7 +5,9 @@ import csv
 import hashlib
 from pathlib import Path
 
-from make_timings import transform
+from make_timings import transform, decomposition_row
+from recorded_actions import load
+from check_connected_cover import derive as connected_cover_rows
 
 
 ROOT = Path(__file__).resolve().parent
@@ -26,13 +28,24 @@ def unique_ids(name):
 
 def main():
     expected = unique_ids("queries.csv")
-    for name in ("estimated-costs.csv", "six-run-timings.csv", "query-structure.csv", "timings.csv"):
+    records = load()['records']
+    by_id = {row['query_id']: row for row in records}
+    if set(by_id) != expected:
+        raise ValueError('Recorded choices differ from result IDs')
+    for row in rows('queries.csv'):
+        if row['selected_action'] != by_id[row['query_id']]['selected_action']:
+            raise ValueError('Recorded action differs from final result table')
+    for name in ("estimated-costs.csv", "six-run-timings.csv", "query-structure.csv", "timings.csv", "decompositions.csv"):
         if unique_ids(name) != expected:
             raise ValueError(f"{name}: query IDs differ from queries.csv")
     original = rows("six-run-timings.csv")
     simple = rows("timings.csv")
-    if simple != [transform(row) for row in original]:
+    if simple != [transform(row, by_id[row['query_id']]) for row in original]:
         raise ValueError("timings.csv differs from the final six-run data")
+    if rows('decompositions.csv') != [decomposition_row(row) for row in records]:
+        raise ValueError('Decomposition table differs from the recorded plans')
+    if unique_ids('connected-cover.csv') != expected or rows('connected-cover.csv') != connected_cover_rows():
+        raise ValueError('Connected Cover table differs from the saved plans and source graphs')
     supplied = {path.stem for path in (ROOT / "queries").glob("*.sql")}
     if supplied != expected:
         raise ValueError(
@@ -56,7 +69,7 @@ def main():
         actual = hashlib.sha256((ROOT / "queries" / f"{query_id}.sql").read_bytes()).hexdigest()
         if actual != digest:
             raise ValueError(f"SQL SHA-256 mismatch: {query_id}")
-    print("Benchmark inventory: 204 hash-matched SQL files and five matching result tables")
+    print("Verified 204 original queries, 76 exact recorded rewrite files, seven matching result tables, and Connected Cover")
 
 
 if __name__ == "__main__":

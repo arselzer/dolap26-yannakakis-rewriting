@@ -1,0 +1,203 @@
+{
+  "arcs": [
+    {
+      "child": 1,
+      "parent": 0,
+      "separator": [
+        7
+      ]
+    },
+    {
+      "child": 2,
+      "parent": 0,
+      "separator": [
+        7
+      ]
+    },
+    {
+      "child": 3,
+      "parent": 0,
+      "separator": [
+        7
+      ]
+    },
+    {
+      "child": 4,
+      "parent": 3,
+      "separator": [
+        8
+      ]
+    },
+    {
+      "child": 5,
+      "parent": 3,
+      "separator": [
+        8
+      ]
+    },
+    {
+      "child": 6,
+      "parent": 3,
+      "separator": [
+        8
+      ]
+    },
+    {
+      "child": 7,
+      "parent": 3,
+      "separator": [
+        8
+      ]
+    },
+    {
+      "child": 8,
+      "parent": 0,
+      "separator": [
+        7
+      ]
+    }
+  ],
+  "cost": null,
+  "cost_profile": null,
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        7
+      ],
+      "owned": [
+        0,
+        7
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        7
+      ]
+    },
+    {
+      "bag": 1,
+      "cover": [
+        9
+      ],
+      "owned": [
+        2,
+        9
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        7
+      ]
+    },
+    {
+      "bag": 2,
+      "cover": [
+        12
+      ],
+      "owned": [
+        4,
+        12
+      ],
+      "parent": 0,
+      "vertices": [
+        4,
+        7
+      ]
+    },
+    {
+      "bag": 3,
+      "cover": [
+        11
+      ],
+      "owned": [
+        6,
+        11
+      ],
+      "parent": 0,
+      "vertices": [
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "bag": 4,
+      "cover": [
+        8
+      ],
+      "owned": [
+        1,
+        8
+      ],
+      "parent": 3,
+      "vertices": [
+        1,
+        8
+      ]
+    },
+    {
+      "bag": 5,
+      "cover": [
+        10
+      ],
+      "owned": [
+        3,
+        10
+      ],
+      "parent": 3,
+      "vertices": [
+        3,
+        8
+      ]
+    },
+    {
+      "bag": 6,
+      "cover": [
+        13
+      ],
+      "owned": [
+        5,
+        13
+      ],
+      "parent": 3,
+      "vertices": [
+        5,
+        8
+      ]
+    },
+    {
+      "bag": 7,
+      "cover": [
+        16
+      ],
+      "owned": [
+        16,
+        17
+      ],
+      "parent": 3,
+      "vertices": [
+        8,
+        10
+      ]
+    },
+    {
+      "bag": 8,
+      "cover": [
+        14
+      ],
+      "owned": [
+        14,
+        15
+      ],
+      "parent": 0,
+      "vertices": [
+        7,
+        9
+      ]
+    }
+  ],
+  "origin": "structural",
+  "relation_oids": {},
+  "root": 0
+}

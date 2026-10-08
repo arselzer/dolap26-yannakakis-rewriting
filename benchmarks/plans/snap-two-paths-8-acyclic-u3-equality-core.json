@@ -1,0 +1,132 @@
+{
+  "arcs": [
+    {
+      "child": 1,
+      "parent": 0,
+      "separator": [
+        0
+      ]
+    },
+    {
+      "child": 2,
+      "parent": 1,
+      "separator": [
+        4
+      ]
+    },
+    {
+      "child": 3,
+      "parent": 2,
+      "separator": [
+        5
+      ]
+    },
+    {
+      "child": 4,
+      "parent": 0,
+      "separator": [
+        1
+      ]
+    },
+    {
+      "child": 5,
+      "parent": 4,
+      "separator": [
+        2
+      ]
+    }
+  ],
+  "cost": null,
+  "cost_profile": null,
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        0
+      ],
+      "owned": [
+        0
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        1
+      ]
+    },
+    {
+      "bag": 1,
+      "cover": [
+        4
+      ],
+      "owned": [
+        4
+      ],
+      "parent": 0,
+      "vertices": [
+        0,
+        4
+      ]
+    },
+    {
+      "bag": 2,
+      "cover": [
+        5
+      ],
+      "owned": [
+        5
+      ],
+      "parent": 1,
+      "vertices": [
+        4,
+        5
+      ]
+    },
+    {
+      "bag": 3,
+      "cover": [
+        6
+      ],
+      "owned": [
+        6,
+        7
+      ],
+      "parent": 2,
+      "vertices": [
+        5,
+        6
+      ]
+    },
+    {
+      "bag": 4,
+      "cover": [
+        1
+      ],
+      "owned": [
+        1
+      ],
+      "parent": 0,
+      "vertices": [
+        1,
+        2
+      ]
+    },
+    {
+      "bag": 5,
+      "cover": [
+        2
+      ],
+      "owned": [
+        2,
+        3
+      ],
+      "parent": 4,
+      "vertices": [
+        2,
+        3
+      ]
+    }
+  ],
+  "origin": "structural",
+  "relation_oids": {},
+  "root": 0
+}

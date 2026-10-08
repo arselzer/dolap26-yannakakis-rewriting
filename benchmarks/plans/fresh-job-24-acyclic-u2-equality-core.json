@@ -1,0 +1,164 @@
+{
+  "arcs": [
+    {
+      "child": 1,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    },
+    {
+      "child": 2,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    },
+    {
+      "child": 3,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    },
+    {
+      "child": 4,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    },
+    {
+      "child": 5,
+      "parent": 4,
+      "separator": [
+        7
+      ]
+    },
+    {
+      "child": 6,
+      "parent": 0,
+      "separator": [
+        2
+      ]
+    }
+  ],
+  "cost": null,
+  "cost_profile": null,
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        2
+      ],
+      "owned": [
+        0,
+        1,
+        2,
+        9,
+        10,
+        11
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "bag": 1,
+      "cover": [
+        6
+      ],
+      "owned": [
+        3,
+        6
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        4
+      ]
+    },
+    {
+      "bag": 2,
+      "cover": [
+        7
+      ],
+      "owned": [
+        4,
+        7
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        5
+      ]
+    },
+    {
+      "bag": 3,
+      "cover": [
+        8
+      ],
+      "owned": [
+        5,
+        8
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        6
+      ]
+    },
+    {
+      "bag": 4,
+      "cover": [
+        12
+      ],
+      "owned": [
+        12,
+        13
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        7
+      ]
+    },
+    {
+      "bag": 5,
+      "cover": [
+        16
+      ],
+      "owned": [
+        16,
+        17
+      ],
+      "parent": 4,
+      "vertices": [
+        7,
+        9
+      ]
+    },
+    {
+      "bag": 6,
+      "cover": [
+        14
+      ],
+      "owned": [
+        14,
+        15
+      ],
+      "parent": 0,
+      "vertices": [
+        2,
+        8
+      ]
+    }
+  ],
+  "origin": "structural",
+  "relation_oids": {},
+  "root": 0
+}

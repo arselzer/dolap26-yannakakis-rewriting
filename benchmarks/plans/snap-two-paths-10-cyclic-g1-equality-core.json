@@ -1,0 +1,120 @@
+{
+  "arcs": [
+    {
+      "child": 1,
+      "parent": 0,
+      "separator": [
+        0,
+        3
+      ]
+    },
+    {
+      "child": 2,
+      "parent": 1,
+      "separator": [
+        4,
+        6
+      ]
+    },
+    {
+      "child": 3,
+      "parent": 2,
+      "separator": [
+        5,
+        7
+      ]
+    }
+  ],
+  "cost": "172023369052",
+  "cost_profile": "unfiltered-catalog-cover-product/1",
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        0,
+        2
+      ],
+      "owned": [
+        0,
+        1,
+        2
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "bag": 1,
+      "cover": [
+        3,
+        5
+      ],
+      "owned": [
+        3,
+        5
+      ],
+      "parent": 0,
+      "vertices": [
+        0,
+        3,
+        4,
+        6
+      ]
+    },
+    {
+      "bag": 2,
+      "cover": [
+        4,
+        6
+      ],
+      "owned": [
+        4,
+        6
+      ],
+      "parent": 1,
+      "vertices": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "bag": 3,
+      "cover": [
+        7,
+        9
+      ],
+      "owned": [
+        7,
+        8,
+        9
+      ],
+      "parent": 2,
+      "vertices": [
+        5,
+        7,
+        8,
+        9
+      ]
+    }
+  ],
+  "origin": "cost",
+  "relation_oids": {
+    "0": "16498",
+    "1": "16498",
+    "2": "16498",
+    "3": "16498",
+    "4": "16498",
+    "5": "16498",
+    "6": "16498",
+    "7": "16498",
+    "8": "16498",
+    "9": "16498"
+  },
+  "root": 0
+}

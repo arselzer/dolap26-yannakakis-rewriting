@@ -1,0 +1,64 @@
+{
+  "arcs": [
+    {
+      "child": 1,
+      "parent": 0,
+      "separator": [
+        3
+      ]
+    }
+  ],
+  "cost": "283331644132",
+  "cost_profile": "unfiltered-catalog-cover-product/1",
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        0,
+        3
+      ],
+      "owned": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "bag": 1,
+      "cover": [
+        2,
+        6
+      ],
+      "owned": [
+        4,
+        5,
+        6
+      ],
+      "parent": 0,
+      "vertices": [
+        3,
+        4,
+        5
+      ]
+    }
+  ],
+  "origin": "cost",
+  "relation_oids": {
+    "0": "16400",
+    "1": "16400",
+    "2": "16393",
+    "3": "16393",
+    "4": "16393",
+    "5": "16386",
+    "6": "16386"
+  },
+  "root": 0
+}

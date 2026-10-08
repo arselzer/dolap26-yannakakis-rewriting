@@ -1,0 +1,154 @@
+{
+  "arcs": [
+    {
+      "child": 1,
+      "parent": 0,
+      "separator": [
+        1
+      ]
+    },
+    {
+      "child": 2,
+      "parent": 1,
+      "separator": [
+        2
+      ]
+    },
+    {
+      "child": 3,
+      "parent": 2,
+      "separator": [
+        3
+      ]
+    },
+    {
+      "child": 4,
+      "parent": 3,
+      "separator": [
+        4
+      ]
+    },
+    {
+      "child": 5,
+      "parent": 4,
+      "separator": [
+        5
+      ]
+    },
+    {
+      "child": 6,
+      "parent": 5,
+      "separator": [
+        6
+      ]
+    }
+  ],
+  "cost": null,
+  "cost_profile": null,
+  "factors": [
+    {
+      "bag": 0,
+      "cover": [
+        1
+      ],
+      "owned": [
+        0,
+        1
+      ],
+      "parent": null,
+      "vertices": [
+        0,
+        1
+      ]
+    },
+    {
+      "bag": 1,
+      "cover": [
+        2
+      ],
+      "owned": [
+        2
+      ],
+      "parent": 0,
+      "vertices": [
+        1,
+        2
+      ]
+    },
+    {
+      "bag": 2,
+      "cover": [
+        3
+      ],
+      "owned": [
+        3,
+        4
+      ],
+      "parent": 1,
+      "vertices": [
+        2,
+        3
+      ]
+    },
+    {
+      "bag": 3,
+      "cover": [
+        5
+      ],
+      "owned": [
+        5
+      ],
+      "parent": 2,
+      "vertices": [
+        3,
+        4
+      ]
+    },
+    {
+      "bag": 4,
+      "cover": [
+        6
+      ],
+      "owned": [
+        6
+      ],
+      "parent": 3,
+      "vertices": [
+        4,
+        5
+      ]
+    },
+    {
+      "bag": 5,
+      "cover": [
+        7
+      ],
+      "owned": [
+        7
+      ],
+      "parent": 4,
+      "vertices": [
+        5,
+        6
+      ]
+    },
+    {
+      "bag": 6,
+      "cover": [
+        8
+      ],
+      "owned": [
+        8,
+        9
+      ],
+      "parent": 5,
+      "vertices": [
+        6,
+        7
+      ]
+    }
+  ],
+  "origin": "structural",
+  "relation_oids": {},
+  "root": 0
+}
